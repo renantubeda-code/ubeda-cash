@@ -60,26 +60,42 @@ Scripts:
 | `npm run typecheck` | TypeScript sem emitir arquivos |
 | `npm run lint` | ESLint |
 
-## 5. Deploy na Vercel
+## 5. Deploy
 
-1. Em [vercel.com/new](https://vercel.com/new), clique em **Import Git Repository** e selecione `renantubeda-code/app_financas`.
-2. Em **Framework Preset**, confirme que detectou **Next.js** (deve ser automático).
-3. Em **Environment Variables**, adicione:
-   - `NEXT_PUBLIC_SUPABASE_URL` = `https://<seu-projeto>.supabase.co`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = `sb_publishable_...` (ou `eyJ...` no formato legado)
+Suporte para **Vercel** e **Netlify**. Em ambos, adicione as duas variáveis de ambiente:
 
-   Marque os três ambientes (Production, Preview, Development).
-4. Clique em **Deploy** e aguarde o build (~1–2 min).
-5. Copie a URL gerada (ex.: `https://app-financas.vercel.app`) e em **Supabase → Authentication → URL Configuration**:
-   - **Site URL**: `https://app-financas.vercel.app`
-   - **Redirect URLs**: adicione a mesma URL (e `http://localhost:3000` para dev)
+- `NEXT_PUBLIC_SUPABASE_URL` = `https://<seu-projeto>.supabase.co`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` = `sb_publishable_...` (ou `eyJ...` no formato legado)
+
+### 5.1 Vercel
+
+1. Em [vercel.com/new](https://vercel.com/new), importe o repositório.
+2. **Framework Preset** detecta **Next.js** automaticamente.
+3. Em **Environment Variables**, adicione as duas variáveis acima (marque Production, Preview e Development).
+4. Clique em **Deploy** e aguarde (~1–2 min).
+
+### 5.2 Netlify
+
+O repositório já contém `netlify.toml` (build command + plugin Next.js) e `.nvmrc` (Node 20).
+
+1. Em [app.netlify.com/start](https://app.netlify.com/start), clique em **Import an existing project** → **Deploy with GitHub** → selecione o repositório.
+2. As configurações de build vêm do `netlify.toml` — não precisa mudar nada.
+3. Em **Add environment variables**, adicione `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+4. Clique em **Deploy site**. O Netlify instala o `@netlify/plugin-nextjs` automaticamente (~2–3 min).
+
+### 5.3 Pós-deploy (qualquer plataforma)
+
+Copie a URL gerada (ex.: `https://ubeda-cash.netlify.app`) e em **Supabase → Authentication → URL Configuration**:
+
+- **Site URL**: cole a URL pública
+- **Redirect URLs**: adicione a URL pública e `http://localhost:3000` (para dev local)
 
 ### Notas de segurança
 
 - **Nunca comite `.env.local`** — já está no `.gitignore`.
 - As duas variáveis começam com `NEXT_PUBLIC_` porque precisam ser acessíveis no cliente (SSR + navegador via `@supabase/ssr`). A chave `anon` / `publishable` é **desenhada para ser pública**; a segurança é garantida pelas policies de **Row Level Security** do Postgres (cada usuário só enxerga `auth.uid() = user_id`).
 - **Nunca use a `service_role` key neste projeto** — ela bypassa RLS e só deve ser usada em funções server-only isoladas (ex.: jobs). Este app não precisa dela.
-- Se trocar sua chave publishable no Supabase, atualize a variável na Vercel e redeploye.
+- Se trocar sua chave publishable no Supabase, atualize a variável na plataforma de deploy e redeploye.
 
 ## 6. Estrutura
 
