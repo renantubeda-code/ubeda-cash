@@ -150,9 +150,9 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             Visão consolidada do mês selecionado.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <MonthSelector year={year} month={month} />
-          <Button asChild>
+          <Button asChild className="ml-auto sm:ml-0">
             <Link href="/transacoes/nova">
               <Plus className="mr-2 h-4 w-4" /> Nova
             </Link>
@@ -206,6 +206,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 </Button>
               </div>
             ) : (
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -245,6 +246,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             )}
           </CardContent>
         </Card>

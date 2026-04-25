@@ -26,12 +26,16 @@ export async function signIn(_prev: unknown, formData: FormData) {
 export async function signUp(_prev: unknown, formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
   if (!email || !password) {
     return { error: "Preencha e-mail e senha." };
   }
   if (password.length < 6) {
     return { error: "A senha deve ter ao menos 6 caracteres." };
+  }
+  if (password !== confirmPassword) {
+    return { error: "As senhas não coincidem." };
   }
 
   const supabase = createClient();

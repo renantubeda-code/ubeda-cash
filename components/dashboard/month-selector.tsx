@@ -28,7 +28,7 @@ export function MonthSelector({ year, month }: Props) {
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
-      <div className="min-w-[140px] text-center text-sm font-medium">
+      <div className="min-w-[120px] text-center text-sm font-medium sm:min-w-[140px]">
         {monthLabel(year, month)}
       </div>
       <Button
