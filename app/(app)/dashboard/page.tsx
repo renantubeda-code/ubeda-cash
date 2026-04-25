@@ -175,7 +175,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-2">
+        <Card className="min-w-0 lg:col-span-2">
           <CardHeader>
             <CardTitle>Despesas por categoria</CardTitle>
             <CardDescription>Distribuição do mês.</CardDescription>
@@ -185,7 +185,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-3">
+        <Card className="min-w-0 lg:col-span-3">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Últimas transações</CardTitle>
