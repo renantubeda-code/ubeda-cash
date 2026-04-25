@@ -1,4 +1,4 @@
-# FinançasPessoais
+# Ubeda Cash Control
 
 App web de gestão de finanças pessoais (receitas, despesas, categorias, dashboard e exportação CSV).
 
@@ -62,11 +62,24 @@ Scripts:
 
 ## 5. Deploy na Vercel
 
-1. Suba o código para um repositório no GitHub.
-2. Em [vercel.com/new](https://vercel.com/new), importe o repositório.
-3. Em **Environment Variables**, adicione `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-4. Clique em **Deploy**.
-5. Após o deploy, copie a URL (`https://seu-app.vercel.app`) e em **Supabase → Authentication → URL Configuration**, adicione-a em *Site URL* e em *Redirect URLs*.
+1. Em [vercel.com/new](https://vercel.com/new), clique em **Import Git Repository** e selecione `renantubeda-code/app_financas`.
+2. Em **Framework Preset**, confirme que detectou **Next.js** (deve ser automático).
+3. Em **Environment Variables**, adicione:
+   - `NEXT_PUBLIC_SUPABASE_URL` = `https://<seu-projeto>.supabase.co`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = `sb_publishable_...` (ou `eyJ...` no formato legado)
+
+   Marque os três ambientes (Production, Preview, Development).
+4. Clique em **Deploy** e aguarde o build (~1–2 min).
+5. Copie a URL gerada (ex.: `https://app-financas.vercel.app`) e em **Supabase → Authentication → URL Configuration**:
+   - **Site URL**: `https://app-financas.vercel.app`
+   - **Redirect URLs**: adicione a mesma URL (e `http://localhost:3000` para dev)
+
+### Notas de segurança
+
+- **Nunca comite `.env.local`** — já está no `.gitignore`.
+- As duas variáveis começam com `NEXT_PUBLIC_` porque precisam ser acessíveis no cliente (SSR + navegador via `@supabase/ssr`). A chave `anon` / `publishable` é **desenhada para ser pública**; a segurança é garantida pelas policies de **Row Level Security** do Postgres (cada usuário só enxerga `auth.uid() = user_id`).
+- **Nunca use a `service_role` key neste projeto** — ela bypassa RLS e só deve ser usada em funções server-only isoladas (ex.: jobs). Este app não precisa dela.
+- Se trocar sua chave publishable no Supabase, atualize a variável na Vercel e redeploye.
 
 ## 6. Estrutura
 

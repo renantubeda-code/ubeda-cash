@@ -23,6 +23,10 @@ import {
   CategoryChart,
   type CategoryDatum,
 } from "@/components/dashboard/category-chart";
+import {
+  TrendChart,
+  type TrendDatum,
+} from "@/components/dashboard/trend-chart";
 import { MonthSelector } from "@/components/dashboard/month-selector";
 import {
   currentYearMonth,
@@ -37,6 +41,27 @@ interface PageProps {
   searchParams: { year?: string; month?: string };
 }
 
+const TREND_MONTHS = 6;
+
+const shortMonthFormatter = new Intl.DateTimeFormat("pt-BR", {
+  month: "short",
+});
+
+function buildTrendBuckets(endYear: number, endMonth: number): TrendDatum[] {
+  const buckets: TrendDatum[] = [];
+  for (let i = TREND_MONTHS - 1; i >= 0; i--) {
+    const date = new Date(endYear, endMonth - 1 - i, 1);
+    const rawLabel = shortMonthFormatter.format(date).replace(".", "");
+    const label = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
+    buckets.push({ label, income: 0, expense: 0 });
+  }
+  return buckets;
+}
+
+function trendKey(year: number, month: number): string {
+  return `${year}-${String(month).padStart(2, "0")}`;
+}
+
 export default async function DashboardPage({ searchParams }: PageProps) {
   const supabase = createClient();
 
@@ -46,17 +71,30 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const from = firstDayOfMonth(year, month);
   const to = lastDayOfMonth(year, month);
 
-  const { data: txData } = await supabase
-    .from("transactions")
-    .select(
-      "id, user_id, category_id, type, amount, description, occurred_on, created_at, updated_at, category:categories(id, name, color, type)"
-    )
-    .gte("occurred_on", from)
-    .lte("occurred_on", to)
-    .order("occurred_on", { ascending: false })
-    .order("created_at", { ascending: false });
+  const trendStartDate = new Date(year, month - 1 - (TREND_MONTHS - 1), 1);
+  const trendFrom = firstDayOfMonth(
+    trendStartDate.getFullYear(),
+    trendStartDate.getMonth() + 1
+  );
 
-  const transactions = (txData ?? []) as unknown as TransactionWithCategory[];
+  const [monthResult, trendResult] = await Promise.all([
+    supabase
+      .from("transactions")
+      .select(
+        "id, user_id, category_id, type, amount, description, occurred_on, created_at, updated_at, category:categories(id, name, color, type)"
+      )
+      .gte("occurred_on", from)
+      .lte("occurred_on", to)
+      .order("occurred_on", { ascending: false })
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("transactions")
+      .select("type, amount, occurred_on")
+      .gte("occurred_on", trendFrom)
+      .lte("occurred_on", to),
+  ]);
+
+  const transactions = (monthResult.data ?? []) as unknown as TransactionWithCategory[];
 
   const income = transactions
     .filter((t) => t.type === "income")
@@ -81,6 +119,26 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     (a, b) => b.value - a.value
   );
 
+  const trendBuckets = buildTrendBuckets(year, month);
+  const indexByKey = new Map<string, number>();
+  for (let i = 0; i < TREND_MONTHS; i++) {
+    const date = new Date(year, month - 1 - (TREND_MONTHS - 1) + i, 1);
+    indexByKey.set(
+      trendKey(date.getFullYear(), date.getMonth() + 1),
+      i
+    );
+  }
+  for (const row of trendResult.data ?? []) {
+    const [y, m] = (row.occurred_on as string).split("-").map(Number);
+    const idx = indexByKey.get(trendKey(y, m));
+    if (idx === undefined) continue;
+    if (row.type === "income") {
+      trendBuckets[idx].income += Number(row.amount);
+    } else {
+      trendBuckets[idx].expense += Number(row.amount);
+    }
+  }
+
   const recent = transactions.slice(0, 5);
 
   return (
@@ -103,6 +161,18 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       </div>
 
       <SummaryCards income={income} expense={expense} />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Receitas vs Despesas</CardTitle>
+          <CardDescription>
+            Comparação dos últimos {TREND_MONTHS} meses.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TrendChart data={trendBuckets} />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-2">

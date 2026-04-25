@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListPlus, Wallet, LogOut } from "lucide-react";
+import { LayoutDashboard, ListPlus, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { LogoMark } from "@/components/brand/logo";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -18,10 +20,8 @@ export function AppNav({ email }: { email: string | null }) {
       <div className="container flex h-16 items-center justify-between gap-4">
         <div className="flex items-center gap-6">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Wallet className="h-4 w-4" />
-            </span>
-            <span className="hidden sm:inline">FinançasPessoais</span>
+            <LogoMark className="h-8 w-8" />
+            <span className="hidden sm:inline">Ubeda Cash Control</span>
           </Link>
           <nav className="flex items-center gap-1">
             {navItems.map((item) => {
@@ -50,6 +50,7 @@ export function AppNav({ email }: { email: string | null }) {
           <span className="hidden max-w-[160px] truncate text-sm text-muted-foreground md:inline">
             {email}
           </span>
+          <ThemeToggle />
           <form action="/auth/sign-out" method="post">
             <button
               type="submit"

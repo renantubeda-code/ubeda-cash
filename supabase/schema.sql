@@ -1,5 +1,5 @@
 -- ============================================================
--- FinançasPessoais — Schema Supabase
+-- Ubeda Cash Control — Schema Supabase
 -- Execute este SQL no SQL Editor do Supabase Dashboard.
 -- ============================================================
 
